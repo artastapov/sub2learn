@@ -148,8 +148,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# TODO use sqlite. Words: word, translation, sourcefile, bool known, timestamp; seen_files: name, timestamp
-# TODO add translation for unknown words (use Google Translate API or analogue)
-# TODO add support for youtube links processing
-# TODO process videos in parallel
