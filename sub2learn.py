@@ -53,7 +53,7 @@ def cleanup(words):
 
     # change word to neutral form (lemmatize), e.g. ducks -> duck, changed -> change
     words = [token.lemma_ for token in nlp(' '.join(words))]
-    # remove duplicates
+    # remove duplicates in list
     words = list(set(words))
     return words
 
