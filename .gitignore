@@ -1,4 +1,11 @@
 seen_files.txt
+known_words.txt
+to_learn.txt
+~sub2learn.srt
+7000.txt
+10000words.txt
+new_words.txt
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
