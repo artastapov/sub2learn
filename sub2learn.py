@@ -69,7 +69,6 @@ def read_sub(fname):
 
 
 def main():
-    print("Hello World!")
     with open(SEEN_FILE, 'r', encoding="utf-8") as f_seen_file:
         seen_files_list = [line.rstrip('\n') for line in f_seen_file]
 
