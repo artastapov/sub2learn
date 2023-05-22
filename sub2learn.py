@@ -9,12 +9,12 @@ import spacy
 from langdetect import detect
 
 TO_FILTER = ["'s", '&lt', '&gt', "'ll", '</i', 'i>', '...', "'ve", "'re", 'anti-', 'self-',
-             'semi-', 'ex-', 'non-', 'font', '<c>', '</c>', '--', 'color=', 'www', '.com', '.org', 'size=']
+             'semi-', 'ex-', 'non-', 'font', '<c>', '</c>', '--', 'color=', 'www', '.com', '.org', 'size=', '\\h']
 EXT_SUBS = ['.srt', '.vtt']
 EXT_VIDEOS = ['.mkv', '.mp4']
 
 # set paths
-VIDEOS_PATH = 'c:\\Users\\Artem\\YandexDisk\\video'     # Use dual \\ in Windows. No trailing \\
+VIDEOS_PATH = 'c:\\Users\\Artem\\YandexDisk\\video\\1'     # Use dual \\ in Windows. No trailing \\
 WORK_PATH = 'c:\\Users\\Artem\\YandexDisk\\BU\\sub2learn'
 TMP = WORK_PATH + '\\~sub2learn.srt'
 SEEN_FILE = WORK_PATH + '\\seen_files.txt'
@@ -23,6 +23,7 @@ NEW_WORDS_FILE = WORK_PATH+'\\new_words.txt'
 
 colorama.init(autoreset=True)
 RED = colorama.Fore.RED
+YELLOW = colorama.Fore.YELLOW
 GREEN = colorama.Fore.GREEN
 
 try:
@@ -69,8 +70,11 @@ def read_sub(fname):
 
 
 def main():
-    with open(SEEN_FILE, 'r', encoding="utf-8") as f_seen_file:
-        seen_files_list = [line.rstrip('\n') for line in f_seen_file]
+    try:
+        with open(SEEN_FILE, 'r', encoding="utf-8") as f_seen_file:
+            seen_files_list = [line.rstrip('\n') for line in f_seen_file]
+    except FileNotFoundError:
+        seen_files_list = []
 
     os.chdir(VIDEOS_PATH)
     print('Creating file list...', end='')
@@ -118,28 +122,40 @@ def main():
     words_read.sort()
     print(f'Words read: {GREEN}{len(words_read)}')
 
-    with open(KNOWN_WORDS_FILE, 'r', encoding="utf-8") as f:
-        known_words = [line.rstrip('\n') for line in f]
-        print(f'Known words DB: {GREEN}{len(known_words)}')
+    try:
+        with open(KNOWN_WORDS_FILE, 'r', encoding="utf-8") as f:
+            known_words = [line.rstrip('\n') for line in f]
+            print(f'Known words DB: {GREEN}{len(known_words)}')
+    except FileNotFoundError:
+        print(f'{YELLOW}Known words DB is empty, creating')
+        open(KNOWN_WORDS_FILE, mode='a').close()
+        known_words = []
 
     unknown_new_words = [x for x in words_read if not (x in known_words)]
     print(f'Unknown words in new files: {GREEN}{len(unknown_new_words)}')
 
-    with open(NEW_WORDS_FILE, 'r', encoding="utf-8") as f:
-        known_new_words = [line.rstrip('\n') for line in f]
-        print(f'Unknown words in DB: {GREEN}{len(known_new_words)}')
+    try:
+        with open(NEW_WORDS_FILE, 'r', encoding="utf-8") as f:
+            unknown_words_db = [line.rstrip('\n') for line in f]
+            print(f'Unknown words in DB: {GREEN}{len(unknown_words_db)}')
+    except FileNotFoundError:
+        print(f'{YELLOW}Unknown words DB is empty. Will create later')
+        unknown_words_db = []
 
-    total_new_words = known_new_words + unknown_new_words
+    total_new_words = unknown_words_db + unknown_new_words
     total_new_words = list(set(total_new_words))
     total_new_words = cleanup(total_new_words)
+    total_new_words = [item for item in total_new_words if item not in known_words]
     total_new_words.sort()
     print(f'Total unknown words: {GREEN}{len(total_new_words)}')
 
     with open(NEW_WORDS_FILE, 'w+', encoding="utf-8") as f:
         f.write('\n'.join(total_new_words))
+        f.write('\n')
 
-    with open(SEEN_FILE, 'a', encoding="utf-8") as f:
+    with open(SEEN_FILE, 'a+', encoding="utf-8") as f:
         f.write('\n'.join(processed_files))
+        f.write('\n')
 
     print(f'Skipped {to_skip} file(s)')
     print(f'Now review {GREEN}{os.path.basename(NEW_WORDS_FILE)} ', end='')
