@@ -14,8 +14,8 @@ EXT_SUBS = ['.srt', '.vtt']
 EXT_VIDEOS = ['.mkv', '.mp4']
 
 # set paths
-VIDEOS_PATH = 'c:\\Users\\Artem\\YandexDisk\\video\\1'     # Use dual \\ in Windows. No trailing \\
-WORK_PATH = 'c:\\Users\\Artem\\YandexDisk\\BU\\sub2learn'
+VIDEOS_PATH = 'c:\\Users\\Artem\\YandexDisk\\video'     # Use dual \\ in Windows. No trailing \\
+WORK_PATH = os.path.dirname(os.path.realpath(__file__))
 TMP = WORK_PATH + '\\~sub2learn.srt'
 SEEN_FILE = WORK_PATH + '\\seen_files.txt'
 KNOWN_WORDS_FILE = WORK_PATH + '\\known_words.txt'
