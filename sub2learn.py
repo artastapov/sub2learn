@@ -36,6 +36,7 @@ def cleanup(words):
     words = [word.replace("’", "'") for word in words]
     words = [word.replace("—", "-") for word in words]
     words = [word.replace("&nbsp", ' ') for word in words]
+    words = [word.replace("&amp;", '&') for word in words]
     words = [word.replace(":", ' ') for word in words]
     for filter_item in TO_FILTER:
         words = [word.replace(filter_item, '') for word in words]
@@ -90,6 +91,7 @@ def main():
         extension = os.path.splitext(f)[1]
         name = os.path.basename(f)
         try:
+            # you can do it with pcre, counting non-english symbols, but Ijust wanted to try this module
             lang = detect(name)
         except Exception:
             lang = 'unknown'
@@ -122,6 +124,7 @@ def main():
     words_read.sort()
     print(f'Words read: {GREEN}{len(words_read)}')
 
+    # read know words DB
     try:
         with open(KNOWN_WORDS_FILE, 'r', encoding="utf-8") as f:
             known_words = [line.rstrip('\n') for line in f]
@@ -131,28 +134,32 @@ def main():
         open(KNOWN_WORDS_FILE, mode='a').close()
         known_words = []
 
+    # filter out known words from newly read words
     unknown_new_words = [x for x in words_read if not (x in known_words)]
     print(f'Unknown words in new files: {GREEN}{len(unknown_new_words)}')
 
+    # read unknown words DB
     try:
         with open(NEW_WORDS_FILE, 'r', encoding="utf-8") as f:
             unknown_words_db = [line.rstrip('\n') for line in f]
             print(f'Unknown words in DB: {GREEN}{len(unknown_words_db)}')
     except FileNotFoundError:
-        print(f'{YELLOW}Unknown words DB is empty. Will create later')
+        print(f'{YELLOW}Unknown words DB is empty, creating')
+        open(NEW_WORDS_FILE, mode='a').close()
         unknown_words_db = []
 
+    # generate final list of unknown words then save
     total_new_words = unknown_words_db + unknown_new_words
-    total_new_words = list(set(total_new_words))
     total_new_words = cleanup(total_new_words)
+    total_new_words = list(set(total_new_words))
     total_new_words = [item for item in total_new_words if item not in known_words]
     total_new_words.sort()
     print(f'Total unknown words: {GREEN}{len(total_new_words)}')
-
     with open(NEW_WORDS_FILE, 'w+', encoding="utf-8") as f:
         f.write('\n'.join(total_new_words))
         f.write('\n')
 
+    # append filelist to seen_files list
     with open(SEEN_FILE, 'a+', encoding="utf-8") as f:
         f.write('\n'.join(processed_files))
         f.write('\n')
